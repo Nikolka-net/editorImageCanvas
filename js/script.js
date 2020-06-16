@@ -1,9 +1,12 @@
 'use strict';
 
 (async function () {
+	const CANVAS_WIDTH = 750;
+	const CANVAS_HEIGHT = 750;
+
 	const canvas = document.getElementById('canvas');
 	const context = canvas.getContext('2d'); // работаем в режиме 2d
-	const image = await loadImage('space.jpg'); // получ. изображение, дождись выполнения промиса
+	let originalImage = await loadImage('./image/space.jpg'); // получ. изображение, дождись выполнения промиса
 	const mouse = getMouse(canvas); // данные по координатам
 
 	/* Фильтры */
@@ -12,21 +15,29 @@
 	const filterBlueInput = document.getElementById('filterBlue');
 	const filterGreenInput = document.getElementById('filterGreen');
 
+	let image = originalImage; // переменная для originalImage
+
 	const imageParams = { // параметры отступов
 		offsetX: 0,
 		offsetY: 0,
 		scale: 1 // масштаб
 	};
 
-	canvas.width = 750; // размер
-	canvas.height = 750;
+	const filters = {
+		gray: false,
+		red: false,
+		green: false,
+		blue: false
+	};
+
+	canvas.width = CANVAS_WIDTH; // размер
+	canvas.height = CANVAS_HEIGHT;
 
 	/* Обновляем canvas */
 	update();
 
 	function update() {
 		requestAnimationFrame(update);
-		clearCanvas();
 
 		if (mouse.left) { // если нажата левая кнопка
 			/* Изменение отступов для изме-я отображе-я картинки */
@@ -39,6 +50,7 @@
 			imageParams.scale -= mouse.wheel / 1000;
 
 		}
+		clearCanvas();
 		context.drawImage( // отрисовка изображения
 			image,
 			0, 0,
@@ -59,32 +71,107 @@
 
 	/* Обработчики на фильтры */
 	filterGrayInput.addEventListener('change', () => {
-		console.log('Gray', filterGrayInput.checked);
-
+		filters.gray = filterGrayInput.checked;
+		updateFilter();
 	});
+
 	filterRedInput.addEventListener('change', () => {
+		filters.red = filterRedInput.checked;
+		updateFilter();
+	});
+
+	filterBlueInput.addEventListener('change', () => {
+		filters.blue = filterBlueInput.checked;
+		updateFilter();
+	});
+
+	filterGreenInput.addEventListener('change', () => {
+		filters.green = filterGreenInput.checked;
+		updateFilter();
+	});
+
+	/* Обновление фильтров */
+	function updateFilter() {
+		if (!filters.gray && !filters.red && !filters.blue && !filters.green) { // если не выбраны фильтры
+			image = originalImage;
+		}
 		const canvas = document.createElement('canvas'); // созд. вирт. canvas
 		const context = canvas.getContext('2d');
-		canvas.width = image.width; // задаём размеры
-		canvas.height = image.height;
+		canvas.width = originalImage.width; // задаём размеры
+		canvas.height = originalImage.height;
 		context.drawImage( // задаём отрисовку
-			image,
+			originalImage,
 			0, 0,
-			image.width, image.height,
+			originalImage.width, originalImage.height,
 			0, 0,
-			image.width, image.height
+			canvas.width, canvas.height
 		);
 
-			const imageData = context.getImageData();
-	});
-	filterBlueInput.addEventListener('change', () => {
-		console.log('Blue', filterBlueInput.checked);
+		const imageData = context.getImageData(0, 0, canvas.width, canvas.height); // нужен сервер; записыв. данные изображения - шир., высота
+		if (filters.gray) {
+			for (let i = 0; i < imageData.data.length; i += 4) { // перебор пикселей - цветов
+				const average = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3; // среднее арифме-е из 3-х цветов
+				imageData.data[i] = average;
+				imageData.data[i + 1] = average;
+				imageData.data[i + 2] = average;
+				/* +=4 т.к. каждый 4 меняем канал - gray */
+			}
+		} else {
+			for (let i = 0; i < imageData.data.length; i += 4) {
+				imageData.data[i] = filters.red ? 0 : imageData.data[i];
+				imageData.data[i + 1] = filters.green ? 0 : imageData.data[i + 1];
+				imageData.data[i + 2] = filters.blue ? 0 : imageData.data[i + 2];
+			}
 
-	});
-	filterGreenInput.addEventListener('change', () => {
-		console.log('Green', filterGreenInput.checked);
+		}
 
+		/* возвр. данные для вступления в силу */
+		context.putImageData(
+			imageData,
+			0, // отсюда начинаем
+			0,
+			0,
+			0,
+			imageData.width, // размеры canvasa
+			imageData.height
+		);
+
+		image = canvas; // меняем image на canvas
+
+	}
+
+	/* Скачать фото */
+
+	document.getElementById('download').addEventListener('click', () => {
+		const aElement = document.createElement('a'); // создаём ссылку
+		aElement.setAttribute('download', 'myImage.jpg'); // браузеру: мы хотим скачать
+		aElement.href = canvas.toDataURL('image/jpg'); // задаём адрес картинки
+		aElement.click(); // кликаем по кнопке
 	});
+
+	/* Выбрать фото и закачать */
+	const loadImageInput = document.getElementById('loadImage'); // получ. список загруж. файлов
+	loadImageInput.addEventListener('change', async event => {
+		const file = loadImageInput.files[0]; // получ. 1 файл
+		const base64 = await getBase64(file);
+		const image = new Image(); // для нового рисунка
+		image.onload = () => {
+			originalImage = image; // вместо старого рисунка - новый
+			updateFilter();
+		};
+		image.src = base64; // путь для загрузки картинки
+	});
+
+	/* Проверка на ошибки */
+	function getBase64(file) {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file); // чтение файла в формате DataURL
+			reader.onload = () => resolve(reader.result);
+			reader.onerror = error => reject(error); // ошибка при загрузке
+		});
+	}
+
 
 	/* Получаем img */
 	function loadImage(src) {
@@ -144,6 +231,10 @@
 			if (event.button === 0) { // если левая кнопка мыши
 				mouse.left = false;
 			}
+		});
+
+		element.addEventListener('mouseleave', event => {
+			mouse.left = false;
 		});
 
 		/* Крутим колёсико мыши для масштаба картинки*/
