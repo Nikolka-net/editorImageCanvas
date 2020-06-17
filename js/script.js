@@ -11,6 +11,7 @@
 
 	/* Фильтры */
 	const filterGrayInput = document.getElementById('filterGray');
+	const filterSepiaInput = document.getElementById('filterSepia');
 	const filterRedInput = document.getElementById('filterRed');
 	const filterBlueInput = document.getElementById('filterBlue');
 	const filterGreenInput = document.getElementById('filterGreen');
@@ -27,7 +28,8 @@
 		gray: false,
 		red: false,
 		green: false,
-		blue: false
+		blue: false,
+		sepia: false
 	};
 
 	canvas.width = CANVAS_WIDTH; // размер
@@ -70,6 +72,11 @@
 	}
 
 	/* Обработчики на фильтры */
+	filterSepiaInput.addEventListener('change', () => {
+		filters.sepia = filterSepiaInput.checked;
+		updateFilter();
+	});
+
 	filterGrayInput.addEventListener('change', () => {
 		filters.gray = filterGrayInput.checked;
 		updateFilter();
@@ -92,7 +99,7 @@
 
 	/* Обновление фильтров */
 	function updateFilter() {
-		if (!filters.gray && !filters.red && !filters.blue && !filters.green) { // если не выбраны фильтры
+		if (!filters.gray && !filters.red && !filters.blue && !filters.green && !filters.sepia) { // если не выбраны фильтры
 			image = originalImage;
 		}
 		const canvas = document.createElement('canvas'); // созд. вирт. canvas
@@ -116,6 +123,18 @@
 				imageData.data[i + 2] = average;
 				/* +=4 т.к. каждый 4 меняем канал - gray */
 			}
+		}
+		if (filters.sepia) {
+			let pixels = imageData.data;
+			for (let i = 0; i < imageData.data.length; i += 4) { // перебор пикселей - цветов
+				let r = pixels[i];
+				let g = pixels[i + 1];
+				let b = pixels[i + 2];
+				pixels[i] = (r * 0.393) + (g * 0.769) + (b * 0.189); // red
+				pixels[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168); // green
+				pixels[i + 2] = (r * 0.272) + (g * 0.534) + (b * 0.131); // blue
+			}
+
 		} else {
 			for (let i = 0; i < imageData.data.length; i += 4) {
 				imageData.data[i] = filters.red ? 0 : imageData.data[i];
