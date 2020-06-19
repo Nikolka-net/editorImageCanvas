@@ -1,10 +1,75 @@
 'use strict';
 
 (async function () {
-	const CANVAS_WIDTH = 750;
-	const CANVAS_HEIGHT = 750;
+
+	/* Ширина canvas */
+	let sizeCanvas = {
+		CANVAS_WIDTH: 400,
+		CANVAS_HEIGHT: 400
+	};
 
 	const canvas = document.getElementById('canvas');
+
+	/* Прослушиватель изменения окна браузера, с оптимизацией */
+
+	let throttle = function (type, name, obj) {
+		obj = obj || window;
+		let running = false;
+		let func = function () {
+			if (running) {
+				return;
+			}
+			running = true;
+			requestAnimationFrame(function () {
+				obj.dispatchEvent(new CustomEvent(name));
+				running = false;
+			});
+		};
+		obj.addEventListener(type, func);
+	};
+	throttle("resize", "optimizedResize");
+
+	/* Изменение canvas при изм. окна браузера */
+	window.addEventListener("optimizedResize", () => {
+
+		function updateSizeCanvas() {
+			let widthBody = document.body.clientWidth; // ширина
+
+			if (widthBody <= 991) {
+				canvas.width = 350; // размер
+				canvas.height = 350;
+			}
+			if (widthBody <= 767) {
+				canvas.width = 280; // размер
+				canvas.height = 280;
+			}
+			if (widthBody <= 575) {
+				canvas.width = 180; // размер
+				canvas.height = 180;
+			}
+		}
+		updateSizeCanvas();
+	});
+
+
+	/* 	body.addEventListener('change', () => {
+			let canvasWidth = parseInt((getComputedStyle(canvas).width), 10); // получ. ширину, убир. пиксели
+			let canvasHeight = parseInt((getComputedStyle(canvas).height), 10);
+			console.log('widthBody: ', widthBody);
+
+			sizeCanvas.CANVAS_HEIGHT = canvasHeight;
+			sizeCanvas.CANVAS_WIDTH = canvasWidth;
+
+			console.log('sizeCanvas.CANVAS_WIDTH: ', sizeCanvas.CANVAS_WIDTH);
+
+		}); */
+
+
+
+
+	/* end w and h canvas */
+
+
 	const context = canvas.getContext('2d'); // работаем в режиме 2d
 	let originalImage = await loadImage('./image/space.jpg'); // получ. изображение, дождись выполнения промиса
 	const mouse = getMouse(canvas); // данные по координатам
@@ -32,8 +97,9 @@
 		sepia: false
 	};
 
-	canvas.width = CANVAS_WIDTH; // размер
-	canvas.height = CANVAS_HEIGHT;
+	canvas.width = sizeCanvas.CANVAS_WIDTH; // размер
+	canvas.height = sizeCanvas.CANVAS_HEIGHT;
+
 
 	/* Обновляем canvas */
 	update();
@@ -82,20 +148,20 @@
 		updateFilter();
 	});
 
-	filterRedInput.addEventListener('change', () => {
-		filters.red = filterRedInput.checked;
-		updateFilter();
-	});
+	/* 	filterRedInput.addEventListener('change', () => {
+			filters.red = filterRedInput.checked;
+			updateFilter();
+		}); */
 
-	filterBlueInput.addEventListener('change', () => {
-		filters.blue = filterBlueInput.checked;
-		updateFilter();
-	});
+	/* 	filterBlueInput.addEventListener('change', () => {
+			filters.blue = filterBlueInput.checked;
+			updateFilter();
+		}); */
 
-	filterGreenInput.addEventListener('change', () => {
-		filters.green = filterGreenInput.checked;
-		updateFilter();
-	});
+	/* 	filterGreenInput.addEventListener('change', () => {
+			filters.green = filterGreenInput.checked;
+			updateFilter();
+		}); */
 
 	/* Обновление фильтров */
 	function updateFilter() {
@@ -190,6 +256,57 @@
 			reader.onerror = error => reject(error); // ошибка при загрузке
 		});
 	}
+
+	/* Эксперименты */
+
+	/* Получаем width and height canvas */
+
+	/* 	const CANVAS = document.getElementById('canvas');
+		const wCanvas = window.getComputedStyle(CANVAS).width;
+		const hCanvas = window.getComputedStyle(CANVAS).height;
+		console.log('wCanvas: ', wCanvas);
+		console.log('hCanvas: ', hCanvas);
+	 */
+
+	/* Проверка яркости */
+
+	const brightness = document.getElementById('brightness');
+	const img = document.getElementById('canvas');
+	const defaults = { // объект для сброса значений
+		brightness: 100
+	};
+	// brightness.addEventListener('input', updateFilterValue);
+
+	function updateFilterValue() {
+		img.style.filter = `
+	brightness(${brightness.value}%)
+	`;
+
+	}
+
+	/* Меняем размер рамки */
+	const sizeBorder = document.getElementById('sizeBorder'); // кнопка для рамки
+
+	let paramsBorder = { // ширина и высота
+		widthBorder: 300,
+		heightBorder: 120
+
+	};
+
+	let getNewParamsBorder = () => {
+
+	};
+
+	sizeBorder.addEventListener('click', () => {
+		console.log(1);
+		//getNewParamsBorder();
+
+		const overlay = document.querySelector('.overlay'); // рамка
+		overlay.style.cssText = `
+		width: ${paramsBorder.widthBorder}px;
+		height: ${paramsBorder.heightBorder}px;
+		`;
+	});
 
 
 	/* Получаем img */
