@@ -19,7 +19,7 @@ body {
 
 .boxImage {
 	background: #fff;
-	padding: 20px;
+	padding: 15px;
 	box-shadow: 15px 1px 30px 0 rgba(0, 0, 0, 0.14), 0 0 0 0 rgba(0, 0, 0, .12), 0 0 0 0 rgba(0, 0, 0, .3);
 	border-radius: 10px;
 	border: 2px dotted green;
@@ -34,6 +34,7 @@ body {
 	align-items: center;
 	flex-direction: column;
 	background: rgba(255, 123, 12, 0.5);
+	display: none;
 }
 
 
@@ -41,6 +42,8 @@ body {
 #canvas {
 	border: 2px solid red;
 	background: antiquewhite;
+	width: 400px;
+	height: 400px;
 }
 
 .buttonCanvas {
@@ -84,21 +87,24 @@ body {
 .centerCanvas {
 	position: relative;
 	text-align: center;
+	max-width: 400px;
 }
 
 
 .overlay {
 	position: absolute;
-	left: -100%;
+	top: 100px;
+	left: 100px;
+	/* left: -100%;
 	right: -100%;
 	top: -100%;
-	bottom: -100%;
+	bottom: -100%; */
 	margin: auto;
 	z-index: 999;
 	width: 200px;
 	height: 200px;
 	border: 2px dotted rgba(222, 60, 80, .9);
-	box-sizing: content-box;
+	box-sizing: border-box;
 	pointer-events: none;
 }
 
@@ -106,24 +112,50 @@ body {
 
 /* media */
 
-/* @media (max-width: 991px) {
+@media (max-width: 991px) {
 	#canvas {
-		width: 300px;
-		height: 300px;
+		width: 350px;
+		height: 350px;
+	}
+
+	.centerCanvas {
+		max-width: 350px;
+	}
+
+	.boxImage {
+		max-width: 385px;
 	}
 }
- */
 
-/* @media (max-width: 767px) {
-	#canvas {
-		width: 250px;
-		height: 250px;
-	}
-} */
 
-/* @media (max-width: 575px) {
+@media (max-width: 767px) {
 	#canvas {
-		width: 200px;
-		height: 200px;
+		width: 280px;
+		height: 280px;
 	}
-} */
+
+	.centerCanvas {
+		max-width: 280px;
+	}
+
+	.boxImage {
+		max-width: 305px;
+		padding: 10px;
+
+	}
+}
+
+@media (max-width: 575px) {
+	#canvas {
+		width: 150px;
+		height: 150px;
+	}
+
+	.centerCanvas {
+		max-width: 150px;
+	}
+
+	.boxImage {
+		max-width: 175px;
+	}
+}

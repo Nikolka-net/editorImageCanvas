@@ -2,76 +2,16 @@
 
 (async function () {
 
-	/* Ширина canvas */
+	/* Размеры canvas по умолчанию */
 	let sizeCanvas = {
 		CANVAS_WIDTH: 400,
 		CANVAS_HEIGHT: 400
 	};
 
 	const canvas = document.getElementById('canvas');
-
-	/* Прослушиватель изменения окна браузера, с оптимизацией */
-
-	let throttle = function (type, name, obj) {
-		obj = obj || window;
-		let running = false;
-		let func = function () {
-			if (running) {
-				return;
-			}
-			running = true;
-			requestAnimationFrame(function () {
-				obj.dispatchEvent(new CustomEvent(name));
-				running = false;
-			});
-		};
-		obj.addEventListener(type, func);
-	};
-	throttle("resize", "optimizedResize");
-
-	/* Изменение canvas при изм. окна браузера */
-	window.addEventListener("optimizedResize", () => {
-
-		function updateSizeCanvas() {
-			let widthBody = document.body.clientWidth; // ширина
-
-			if (widthBody <= 991) {
-				canvas.width = 350; // размер
-				canvas.height = 350;
-			}
-			if (widthBody <= 767) {
-				canvas.width = 280; // размер
-				canvas.height = 280;
-			}
-			if (widthBody <= 575) {
-				canvas.width = 180; // размер
-				canvas.height = 180;
-			}
-		}
-		updateSizeCanvas();
-	});
-
-
-	/* 	body.addEventListener('change', () => {
-			let canvasWidth = parseInt((getComputedStyle(canvas).width), 10); // получ. ширину, убир. пиксели
-			let canvasHeight = parseInt((getComputedStyle(canvas).height), 10);
-			console.log('widthBody: ', widthBody);
-
-			sizeCanvas.CANVAS_HEIGHT = canvasHeight;
-			sizeCanvas.CANVAS_WIDTH = canvasWidth;
-
-			console.log('sizeCanvas.CANVAS_WIDTH: ', sizeCanvas.CANVAS_WIDTH);
-
-		}); */
-
-
-
-
-	/* end w and h canvas */
-
-
 	const context = canvas.getContext('2d'); // работаем в режиме 2d
 	let originalImage = await loadImage('./image/space.jpg'); // получ. изображение, дождись выполнения промиса
+
 	const mouse = getMouse(canvas); // данные по координатам
 
 	/* Фильтры */
@@ -259,14 +199,6 @@
 
 	/* Эксперименты */
 
-	/* Получаем width and height canvas */
-
-	/* 	const CANVAS = document.getElementById('canvas');
-		const wCanvas = window.getComputedStyle(CANVAS).width;
-		const hCanvas = window.getComputedStyle(CANVAS).height;
-		console.log('wCanvas: ', wCanvas);
-		console.log('hCanvas: ', hCanvas);
-	 */
 
 	/* Проверка яркости */
 
@@ -284,30 +216,118 @@
 
 	}
 
-	/* Меняем размер рамки */
-	const sizeBorder = document.getElementById('sizeBorder'); // кнопка для рамки
+	/* вызов редактора при нажатии на картинку */
 
-	let paramsBorder = { // ширина и высота
-		widthBorder: 300,
-		heightBorder: 120
+	const app = document.querySelector('.app');
+	const imgAll = document.querySelectorAll('img'); // получ. все img
 
+
+	const sizeImg = { // для параметров рисунка
+		widthImg: '',
+		heightImg: ''
 	};
 
-	let getNewParamsBorder = () => {
-
+	const sizeOverlay = { // размеры рамки
+		borderLeft: '',
+		borderTop: '',
+		/* 	widthFrame: '',
+			heightFram: '' */
 	};
 
-	sizeBorder.addEventListener('click', () => {
-		console.log(1);
-		//getNewParamsBorder();
+	function getSizeCanvas() { // получ. ширину и высоту canvas css
+		canvas.width = parseInt((getComputedStyle(canvas).width), 10);
+		canvas.height = parseInt((getComputedStyle(canvas).height), 10);
+	}
 
+	function getSizeOverlay() { // высчитываем left and top рамки
+		sizeOverlay.borderLeft = Math.floor(((parseInt((getComputedStyle(canvas).width), 10)) - sizeImg.widthImg) / 2);
+		sizeOverlay.borderTop = Math.floor(((parseInt((getComputedStyle(canvas).height), 10)) - sizeImg.heightImg) / 2);
+	}
+
+	function putSizeOverlay() { // вносим изменения в overlay
 		const overlay = document.querySelector('.overlay'); // рамка
 		overlay.style.cssText = `
-		width: ${paramsBorder.widthBorder}px;
-		height: ${paramsBorder.heightBorder}px;
+		width: ${sizeImg.widthImg}px;
+		height: ${sizeImg.heightImg}px;
+		left: ${sizeOverlay.borderLeft}px;
+		top: ${sizeOverlay.borderTop}px;
 		`;
+	}
+
+
+	/* Клик на рисунок */
+	imgAll.forEach((elem) => {
+		elem.addEventListener('click', () => {
+			app.style.display = 'flex';
+
+			if (elem.hasAttribute('width') || elem.hasAttribute('height')) { // если есть встроенн. стили, выд. их размеры
+				sizeImg.widthImg = elem.clientWidth;
+				sizeImg.heightImg = elem.clientHeight;
+			} else { // выд. реальные размеры
+
+				sizeImg.widthImg = elem.naturalWidth;
+				sizeImg.heightImg = elem.naturalHeight;
+			}
+			getSizeCanvas();
+			getSizeOverlay();
+			putSizeOverlay();
+
+		});
 	});
 
+	/* Прослушиватель изменения окна браузера, с оптимизацией */
+
+	let throttle = function (type, name, obj) {
+		obj = obj || window;
+		let running = false;
+		let func = function () {
+			if (running) {
+				return;
+			}
+			running = true;
+			requestAnimationFrame(function () {
+				obj.dispatchEvent(new CustomEvent(name));
+				running = false;
+			});
+		};
+		obj.addEventListener(type, func);
+	};
+	throttle("resize", "optimizedResize");
+
+	/* Изменение canvas при изм. окна браузера */
+	window.addEventListener("optimizedResize", () => {
+
+		function updateCanvasOverlay() { // обновляем шир. и выс.
+			let widthBody = document.body.clientWidth; // ширина окна браузера
+
+			if (widthBody > 991) {
+				getSizeCanvas();
+				getSizeOverlay();
+				putSizeOverlay();
+			}
+			if (widthBody <= 991) {
+				getSizeCanvas();
+				getSizeOverlay();
+				putSizeOverlay();
+			}
+			if (widthBody <= 767) {
+				getSizeCanvas();
+				getSizeOverlay();
+				putSizeOverlay();
+			}
+			if (widthBody <= 575) {
+				getSizeCanvas();
+				getSizeOverlay();
+				putSizeOverlay();
+			}
+		}
+		updateCanvasOverlay();
+	});
+
+	/* Обрезка по рамке */
+
+
+	/* end эксперименты */
 
 	/* Получаем img */
 	function loadImage(src) {
@@ -321,7 +341,9 @@
 				return reject(err);
 			}
 		});
+
 	}
+
 	/* Получ. координаты */
 	function getMouse(element) {
 		const mouse = {
