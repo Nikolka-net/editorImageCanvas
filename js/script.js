@@ -223,15 +223,18 @@
 
 
 	const sizeImg = { // для параметров рисунка
+		img: '',
 		widthImg: '',
-		heightImg: ''
+		heightImg: '',
+		widthImgOrig: '',
+		heightImgOrig: ''
 	};
 
 	const sizeOverlay = { // размеры рамки
 		borderLeft: '',
 		borderTop: '',
 		/* 	widthFrame: '',
-			heightFram: '' */
+		heightFram: '' */
 	};
 
 	function getSizeCanvas() { // получ. ширину и высоту canvas css
@@ -239,7 +242,31 @@
 		canvas.height = parseInt((getComputedStyle(canvas).height), 10);
 	}
 
-	function getSizeOverlay() { // высчитываем left and top рамки
+	function getSizeImg() { // получ. размеры картинки со стр.
+		sizeImg.widthImg = sizeImg.img.clientWidth;
+		sizeImg.heightImg = sizeImg.img.clientHeight;
+		/* запис. ориг. размеры */
+		sizeImg.widthImgOrig = sizeImg.img.clientWidth;
+		sizeImg.heightImgOrig = sizeImg.img.clientHeight;
+	}
+
+	function getAdaptiveOverlay() { // Подгоняем размер overlay к текущему canvas
+
+		if (sizeImg.widthImg > sizeImg.heightImg) {
+			let ratio = parseFloat((sizeImg.widthImg / sizeImg.heightImg).toFixed(1)); // соотношение сторон, округление до десятых
+			sizeImg.widthImg = (canvas.width - 20); // ширина в соот. с canvas
+			sizeImg.heightImg = Math.floor(sizeImg.widthImg / ratio); // высота в соот. с шириной
+		} else if (sizeImg.widthImg < sizeImg.heightImg) {
+			let ratio = parseFloat((sizeImg.heightImg / sizeImg.widthImg).toFixed(1)); // соотношение сторон, округление до десятых
+			sizeImg.heightImg = (canvas.height - 20); // ширина в соот. с canvas
+			sizeImg.widthImg = Math.floor(sizeImg.heightImg / ratio); // высота в соот. с шириной
+		} else if (sizeImg.widthImg === sizeImg.heightImg) {
+			sizeImg.widthImg = (canvas.width - 20);
+			sizeImg.heightImg = (canvas.height - 20);
+		}
+	}
+
+	function getPositionOverlay() { // высчитываем left and top рамки
 		sizeOverlay.borderLeft = Math.floor(((parseInt((getComputedStyle(canvas).width), 10)) - sizeImg.widthImg) / 2);
 		sizeOverlay.borderTop = Math.floor(((parseInt((getComputedStyle(canvas).height), 10)) - sizeImg.heightImg) / 2);
 	}
@@ -254,24 +281,37 @@
 		`;
 	}
 
+	/* 	function getAdaptiveOverlay() { // Меняем размер overlay, если img > canvas
 
-	/* Клик на рисунок */
+			if (sizeImg.widthImg > (canvas.width - 15) || sizeImg.heightImg > (canvas.height - 15)) {
+				sizeImg.widthImgOrig = sizeImg.img.clientWidth;
+				sizeImg.heightImgOrig = sizeImg.img.clientHeight;
+
+				sizeImg.widthImg = Math.floor((sizeImg.widthImg / canvas.width) * 100);
+				sizeImg.heightImg = Math.floor((sizeImg.heightImg / canvas.height) * 100);
+
+				if (sizeImg.widthImg > (canvas.width - 10) || sizeImg.heightImg > (canvas.height - 10)) {
+					sizeImg.widthImg = Math.floor((sizeImg.widthImg / canvas.width) * 100);
+					sizeImg.heightImg = Math.floor((sizeImg.heightImg / canvas.height) * 100);
+
+					if (sizeImg.widthImg > (canvas.width - 5) || sizeImg.heightImg > (canvas.height - 5)) {
+						sizeImg.widthImg = Math.floor((sizeImg.widthImg / canvas.width) * 25);
+						sizeImg.heightImg = Math.floor((sizeImg.heightImg / canvas.height) * 25);
+					}
+				}
+			}
+		} */
+
+	/* Клик на рисунок - вызываем редактор */
 	imgAll.forEach((elem) => {
 		elem.addEventListener('click', () => {
+			sizeImg.img = elem; // Передаём саму картинку в объект, чтобы к ней обратиться
 			app.style.display = 'flex';
-
-			if (elem.hasAttribute('width') || elem.hasAttribute('height')) { // если есть встроенн. стили, выд. их размеры
-				sizeImg.widthImg = elem.clientWidth;
-				sizeImg.heightImg = elem.clientHeight;
-			} else { // выд. реальные размеры
-
-				sizeImg.widthImg = elem.naturalWidth;
-				sizeImg.heightImg = elem.naturalHeight;
-			}
+			getSizeImg();
 			getSizeCanvas();
-			getSizeOverlay();
+			getAdaptiveOverlay();
+			getPositionOverlay();
 			putSizeOverlay();
-
 		});
 	});
 
@@ -294,31 +334,30 @@
 	};
 	throttle("resize", "optimizedResize");
 
-	/* Изменение canvas при изм. окна браузера */
+	/* Изменение canvas и overlay при изм. окна браузера */
 	window.addEventListener("optimizedResize", () => {
 
 		function updateCanvasOverlay() { // обновляем шир. и выс.
 			let widthBody = document.body.clientWidth; // ширина окна браузера
+			function launchOfAll() {
+				getSizeImg();
+				getSizeCanvas();
+				getAdaptiveOverlay();
+				getPositionOverlay();
+				putSizeOverlay();
+			}
 
 			if (widthBody > 991) {
-				getSizeCanvas();
-				getSizeOverlay();
-				putSizeOverlay();
+				launchOfAll();
 			}
 			if (widthBody <= 991) {
-				getSizeCanvas();
-				getSizeOverlay();
-				putSizeOverlay();
+				launchOfAll();
 			}
 			if (widthBody <= 767) {
-				getSizeCanvas();
-				getSizeOverlay();
-				putSizeOverlay();
+				launchOfAll();
 			}
 			if (widthBody <= 575) {
-				getSizeCanvas();
-				getSizeOverlay();
-				putSizeOverlay();
+				launchOfAll();
 			}
 		}
 		updateCanvasOverlay();
