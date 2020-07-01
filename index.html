@@ -11,14 +11,13 @@
 </head>
 
 <body>
-	<div><img width="180" height="140" id="romantic" src="./image/romanticsmall.jpeg" alt="">
-		<p>Canvas:</p>
-		<canvas id="myCanvas" width="300" height="150" style="border:1px solid #d3d3d3;">
-			Your browser does not support the HTML5 canvas tag.</canvas>
+	<div>
+		<img width="180" height="140" id="romantic" src="./image/romanticsmall.jpeg" alt="">
 	</div>
+	<canvas id="canvasHidden"></canvas>
 	<div><img id="romantic2" src="./image/romantic.jpeg" alt=""></div>
 
-	<div class="app">
+	<div class="editorPhoto">
 		<div class="boxImage">
 			<div class="centerCanvas">
 				<canvas id="canvas"></canvas>
@@ -37,15 +36,25 @@
 							<input type="checkbox" id='filterGray' /> Серый фильтр
 						</label>
 					</div>
+					<!-- 		<div class="slider">
+						<label for="brightness">Яркость</label>
+						<input type="range" min="50" max="200" value="100" id="brightness">
+					</div> -->
 				</div>
 
 				<div class="menuCanvasButtons">
-					<div class="buttonCanvas
-									"><input type="file" accept="image/*" id='loadImage'></div>
-					<div class="buttonCanvas
-									"><button id='sizeBorderCenter'>Изменить размер рамки</button></div>
-					<div class="buttonCanvas
-									"><button id='download'>Скачать</button></div>
+					<div class="buttonCanvas">
+						<label for="loadImage">
+							<a>Выбрать файл</a>
+							<input type="file" accept="image/*" id='loadImage' style="display: none;">
+						</label>
+					</div>
+					<div class="buttonCanvas"><button id='trim'>Обрезать</button>
+					</div>
+					<div class="buttonCanvas"><button id='download'>Скачать</button>
+					</div>
+					<div class="buttonCanvas2"><button id='download2'>Скачать2</button>
+					</div>
 				</div>
 			</div>
 

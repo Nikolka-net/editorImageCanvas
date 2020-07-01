@@ -74,7 +74,7 @@
 	}
 
 	function clearCanvas() { // очистка canvas
-		canvas.width = canvas.width; // каскад-е отображение убирает
+		context.clearRect(0, 0, canvas.width, canvas.height);
 	}
 
 	/* Обработчики на фильтры */
@@ -218,7 +218,7 @@
 
 	/* вызов редактора при нажатии на картинку */
 
-	const app = document.querySelector('.app');
+	const editorPhoto = document.querySelector('.editorPhoto');
 	const imgAll = document.querySelectorAll('img'); // получ. все img
 
 
@@ -306,7 +306,7 @@
 	imgAll.forEach((elem) => {
 		elem.addEventListener('click', () => {
 			sizeImg.img = elem; // Передаём саму картинку в объект, чтобы к ней обратиться
-			app.style.display = 'flex';
+			editorPhoto.style.display = 'flex';
 			getSizeImg();
 			getSizeCanvas();
 			getAdaptiveOverlay();
@@ -363,7 +363,71 @@
 		updateCanvasOverlay();
 	});
 
+
 	/* Обрезка по рамке */
+
+	let trim = document.getElementById('trim');
+	let canvasHidden = document.getElementById('canvasHidden');
+	let canvasHiddenContext = canvasHidden.getContext('2d');
+
+	trim.addEventListener('click', () => {
+
+		canvasHiddenContext.clearRect(0, 0, canvas.width, canvas.height); // очистка canvasHidden
+		canvasHidden.width = sizeImg.widthImgOrig; // задаём размеры canvas
+		canvasHidden.height = sizeImg.heightImgOrig;
+		/* Сохраняем обрез. картинку в соот. с ориг. размером */
+		canvasHiddenContext.drawImage(canvas, sizeOverlay.borderLeft, sizeOverlay.borderTop, sizeImg.widthImg, sizeImg.heightImg, 0, 0, sizeImg.widthImgOrig, sizeImg.heightImgOrig);
+
+		/* blob */
+
+		canvasHidden.toBlob(function (blob) {
+			let newImg = document.createElement('img'),
+				url = URL.createObjectURL(blob);
+			console.log('url: ', url);
+
+			newImg.onload = function () {
+				// больше не нужно читать blob, поэтому он отменен
+				URL.revokeObjectURL(url);
+			};
+
+			newImg.src = url;
+			document.body.appendChild(newImg);
+			console.log('newImg.src: ', newImg.src);
+			console.log('newImg: ', newImg);
+		});
+
+
+	});
+
+
+	document.getElementById('download2').addEventListener('click', () => {
+
+		let aElement = document.createElement('a'); // создаём ссылку
+		aElement.setAttribute('download', 'myImage2.jpg'); // браузеру: мы хотим скачать
+		aElement.href = canvasHidden.toDataURL('image/jpg'); // задаём адрес картинки
+
+		/* get blob */
+		let url = canvasHidden.toDataURL('image/jpg');
+
+		//1
+		fetch(url)
+			.then(res => res.blob())
+			.then(blob => {
+				let fd = new FormData();
+				fd.append('image', blob, 'filename');
+
+
+				// Upload
+				// fetch('upload', {method: 'POST', body: fd});
+			});
+
+		//2
+
+
+
+		/* end blob */
+		aElement.click(); // кликаем по кнопке
+	});
 
 
 	/* end эксперименты */
