@@ -10,7 +10,7 @@
 
 	const canvas = document.getElementById('canvas');
 	const context = canvas.getContext('2d'); // работаем в режиме 2d
-	let originalImage = await loadImage('./image/space.jpg'); // получ. изображение, дождись выполнения промиса
+	let originalImage = await loadImage('./image/space.jpeg'); // получ. изображение, дождись выполнения промиса
 
 	const mouse = getMouse(canvas); // данные по координатам
 
@@ -169,8 +169,8 @@
 
 	document.getElementById('download').addEventListener('click', () => {
 		const aElement = document.createElement('a'); // создаём ссылку
-		aElement.setAttribute('download', 'myImage.jpg'); // браузеру: мы хотим скачать
-		aElement.href = canvas.toDataURL('image/jpg'); // задаём адрес картинки
+		aElement.setAttribute('download', 'myImage.jpeg'); // браузеру: мы хотим скачать
+		aElement.href = canvas.toDataURL('image/jpeg'); // задаём адрес картинки
 		aElement.click(); // кликаем по кнопке
 	});
 
@@ -198,6 +198,7 @@
 	}
 
 	/* Эксперименты */
+
 
 
 	/* Проверка яркости */
@@ -378,24 +379,31 @@
 		/* Сохраняем обрез. картинку в соот. с ориг. размером */
 		canvasHiddenContext.drawImage(canvas, sizeOverlay.borderLeft, sizeOverlay.borderTop, sizeImg.widthImg, sizeImg.heightImg, 0, 0, sizeImg.widthImgOrig, sizeImg.heightImgOrig);
 
-		/* blob */
+		/* blob1 */
+				canvasHidden.toBlob(function (blob) {
+					console.log('blob: ', blob);
 
-		canvasHidden.toBlob(function (blob) {
-			let newImg = document.createElement('img'),
-				url = URL.createObjectURL(blob);
-			console.log('url: ', url);
+				}, 'image/jpeg');
 
-			newImg.onload = function () {
-				// больше не нужно читать blob, поэтому он отменен
-				URL.revokeObjectURL(url);
-			};
+		/* blob2 */
+		let url = canvasHidden.toDataURL('image/jpeg');
 
-			newImg.src = url;
-			document.body.appendChild(newImg);
-			console.log('newImg.src: ', newImg.src);
-			console.log('newImg: ', newImg);
-		});
-
+		/* 	fetch(url)
+				.then(res => res.blob())
+				.then(blob => {
+					let fd = new FormData();
+					fd.append('image', blob, 'filename');
+					console.log('blob: ', blob);
+					// Upload
+					//fetch('upload', {method: 'POST', body: fd})
+					fetch('server.php', {
+							method: 'POST',
+							body: fd
+						})
+						.then(response => response.json())
+						//.then(response => console.log('server', response.blob()))
+						.then(res => console.log(res));
+				}); */
 
 	});
 
@@ -403,29 +411,8 @@
 	document.getElementById('download2').addEventListener('click', () => {
 
 		let aElement = document.createElement('a'); // создаём ссылку
-		aElement.setAttribute('download', 'myImage2.jpg'); // браузеру: мы хотим скачать
-		aElement.href = canvasHidden.toDataURL('image/jpg'); // задаём адрес картинки
-
-		/* get blob */
-		let url = canvasHidden.toDataURL('image/jpg');
-
-		//1
-		fetch(url)
-			.then(res => res.blob())
-			.then(blob => {
-				let fd = new FormData();
-				fd.append('image', blob, 'filename');
-
-
-				// Upload
-				// fetch('upload', {method: 'POST', body: fd});
-			});
-
-		//2
-
-
-
-		/* end blob */
+		aElement.setAttribute('download', 'myImage2.jpeg'); // браузеру: мы хотим скачать
+		aElement.href = canvasHidden.toDataURL('image/jpeg'); // задаём адрес картинки
 		aElement.click(); // кликаем по кнопке
 	});
 
