@@ -1,6 +1,9 @@
 'use strict';
 
+
+
 (async function () {
+
 
 	/* Размеры canvas по умолчанию */
 	let sizeCanvas = {
@@ -14,13 +17,6 @@
 
 	const mouse = getMouse(canvas); // данные по координатам
 
-	/* Фильтры */
-	const filterGrayInput = document.getElementById('filterGray');
-	const filterSepiaInput = document.getElementById('filterSepia');
-	const filterRedInput = document.getElementById('filterRed');
-	const filterBlueInput = document.getElementById('filterBlue');
-	const filterGreenInput = document.getElementById('filterGreen');
-
 	let image = originalImage; // переменная для originalImage
 
 	const imageParams = { // параметры отступов
@@ -29,17 +25,8 @@
 		scale: 1 // масштаб
 	};
 
-	const filters = {
-		gray: false,
-		red: false,
-		green: false,
-		blue: false,
-		sepia: false
-	};
-
 	canvas.width = sizeCanvas.CANVAS_WIDTH; // размер
 	canvas.height = sizeCanvas.CANVAS_HEIGHT;
-
 
 	/* Обновляем canvas */
 	update();
@@ -77,37 +64,10 @@
 		context.clearRect(0, 0, canvas.width, canvas.height);
 	}
 
-	/* Обработчики на фильтры */
-	filterSepiaInput.addEventListener('change', () => {
-		filters.sepia = filterSepiaInput.checked;
-		updateFilter();
-	});
+	/* Обновление canvas при загрузке новой картинки */
 
-	filterGrayInput.addEventListener('change', () => {
-		filters.gray = filterGrayInput.checked;
-		updateFilter();
-	});
-
-	/* 	filterRedInput.addEventListener('change', () => {
-			filters.red = filterRedInput.checked;
-			updateFilter();
-		}); */
-
-	/* 	filterBlueInput.addEventListener('change', () => {
-			filters.blue = filterBlueInput.checked;
-			updateFilter();
-		}); */
-
-	/* 	filterGreenInput.addEventListener('change', () => {
-			filters.green = filterGreenInput.checked;
-			updateFilter();
-		}); */
-
-	/* Обновление фильтров */
-	function updateFilter() {
-		if (!filters.gray && !filters.red && !filters.blue && !filters.green && !filters.sepia) { // если не выбраны фильтры
-			image = originalImage;
-		}
+	function updateImgCanvas() {
+		image = originalImage;
 		const canvas = document.createElement('canvas'); // созд. вирт. canvas
 		const context = canvas.getContext('2d');
 		canvas.width = originalImage.width; // задаём размеры
@@ -121,36 +81,8 @@
 		);
 
 		const imageData = context.getImageData(0, 0, canvas.width, canvas.height); // нужен сервер; записыв. данные изображения - шир., высота
-		if (filters.gray) {
-			for (let i = 0; i < imageData.data.length; i += 4) { // перебор пикселей - цветов
-				const average = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3; // среднее арифме-е из 3-х цветов
-				imageData.data[i] = average;
-				imageData.data[i + 1] = average;
-				imageData.data[i + 2] = average;
-				/* +=4 т.к. каждый 4 меняем канал - gray */
-			}
-		}
-		if (filters.sepia) {
-			let pixels = imageData.data;
-			for (let i = 0; i < imageData.data.length; i += 4) { // перебор пикселей - цветов
-				let r = pixels[i];
-				let g = pixels[i + 1];
-				let b = pixels[i + 2];
-				pixels[i] = (r * 0.393) + (g * 0.769) + (b * 0.189); // red
-				pixels[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168); // green
-				pixels[i + 2] = (r * 0.272) + (g * 0.534) + (b * 0.131); // blue
-			}
 
-		} else {
-			for (let i = 0; i < imageData.data.length; i += 4) {
-				imageData.data[i] = filters.red ? 0 : imageData.data[i];
-				imageData.data[i + 1] = filters.green ? 0 : imageData.data[i + 1];
-				imageData.data[i + 2] = filters.blue ? 0 : imageData.data[i + 2];
-			}
-
-		}
-
-		/* возвр. данные для вступления в силу */
+		// возвр. данные для вступления в силу
 		context.putImageData(
 			imageData,
 			0, // отсюда начинаем
@@ -179,10 +111,10 @@
 	loadImageInput.addEventListener('change', async event => {
 		const file = loadImageInput.files[0]; // получ. 1 файл
 		const base64 = await getBase64(file);
-		const image = new Image(); // для нового рисунка
+		let image = new Image(); // для нового рисунка
 		image.onload = () => {
 			originalImage = image; // вместо старого рисунка - новый
-			updateFilter();
+			updateImgCanvas();
 		};
 		image.src = base64; // путь для загрузки картинки
 	});
@@ -198,24 +130,6 @@
 	}
 
 	/* Эксперименты */
-
-
-
-	/* Проверка яркости */
-
-	const brightness = document.getElementById('brightness');
-	const img = document.getElementById('canvas');
-	const defaults = { // объект для сброса значений
-		brightness: 100
-	};
-	// brightness.addEventListener('input', updateFilterValue);
-
-	function updateFilterValue() {
-		img.style.filter = `
-	brightness(${brightness.value}%)
-	`;
-
-	}
 
 	/* вызов редактора при нажатии на картинку */
 
@@ -233,9 +147,7 @@
 
 	const sizeOverlay = { // размеры рамки
 		borderLeft: '',
-		borderTop: '',
-		/* 	widthFrame: '',
-		heightFram: '' */
+		borderTop: ''
 	};
 
 	function getSizeCanvas() { // получ. ширину и высоту canvas css
@@ -282,26 +194,6 @@
 		`;
 	}
 
-	/* 	function getAdaptiveOverlay() { // Меняем размер overlay, если img > canvas
-
-			if (sizeImg.widthImg > (canvas.width - 15) || sizeImg.heightImg > (canvas.height - 15)) {
-				sizeImg.widthImgOrig = sizeImg.img.clientWidth;
-				sizeImg.heightImgOrig = sizeImg.img.clientHeight;
-
-				sizeImg.widthImg = Math.floor((sizeImg.widthImg / canvas.width) * 100);
-				sizeImg.heightImg = Math.floor((sizeImg.heightImg / canvas.height) * 100);
-
-				if (sizeImg.widthImg > (canvas.width - 10) || sizeImg.heightImg > (canvas.height - 10)) {
-					sizeImg.widthImg = Math.floor((sizeImg.widthImg / canvas.width) * 100);
-					sizeImg.heightImg = Math.floor((sizeImg.heightImg / canvas.height) * 100);
-
-					if (sizeImg.widthImg > (canvas.width - 5) || sizeImg.heightImg > (canvas.height - 5)) {
-						sizeImg.widthImg = Math.floor((sizeImg.widthImg / canvas.width) * 25);
-						sizeImg.heightImg = Math.floor((sizeImg.heightImg / canvas.height) * 25);
-					}
-				}
-			}
-		} */
 
 	/* Клик на рисунок - вызываем редактор */
 	imgAll.forEach((elem) => {
@@ -371,6 +263,7 @@
 	let canvasHidden = document.getElementById('canvasHidden');
 	let canvasHiddenContext = canvasHidden.getContext('2d');
 
+
 	trim.addEventListener('click', () => {
 
 		canvasHiddenContext.clearRect(0, 0, canvas.width, canvas.height); // очистка canvasHidden
@@ -380,30 +273,87 @@
 		canvasHiddenContext.drawImage(canvas, sizeOverlay.borderLeft, sizeOverlay.borderTop, sizeImg.widthImg, sizeImg.heightImg, 0, 0, sizeImg.widthImgOrig, sizeImg.heightImgOrig);
 
 		/* blob1 */
-				canvasHidden.toBlob(function (blob) {
+		/* 		canvasHidden.toBlob(function (blob) {
+					let fd = new FormData();
+					fd.append(blob);
+					axios
+						.post('../api/server.php', fd, {
+							headers: {
+								'Content-Type': 'multipart/form-data'
+							}
+						})
+						.then((res) => {
+							console.log('res', res);
+						});
+
 					console.log('blob: ', blob);
 
-				}, 'image/jpeg');
+				}, 'image/jpeg'); */
 
 		/* blob2 */
 		let url = canvasHidden.toDataURL('image/jpeg');
+		// let fd = new FormData();
+		// fd.append('image', url);
+
+		$.ajax({
+			url: 'server.php',
+			type: 'POST',
+			data: {
+				url: url
+			},
+			// processData: false,
+			// contentType: false,
+			success: function (res) {
+				console.log(res);
+			},
+			error: function () {
+				console.log('Произошла ошибка!');
+			}
+		});
+
 
 		/* 	fetch(url)
-				.then(res => res.blob())
-				.then(blob => {
+				.then(res => res.blob()) */
+		/* 	.then(blob => {
+				let fd = new FormData();
+				fd.append('image', blob);
+				console.log('blob: ', blob);
+
+				// Upload
+				//fetch('upload', {method: 'POST', body: fd})
+				 	// fetch('server.php', {
+					// 		method: 'POST',
+					// 		body: fd
+					// 	})
+				// .then(response => response.blob());
+				//  .then(response => console.log('server', response.blob()));
+				//.then(response => console.log('res', response));
+			}); */
+
+		/* blob3 */
+
+
+
+		/* 		canvasHidden.toBlob(function (blob) {
 					let fd = new FormData();
-					fd.append('image', blob, 'filename');
-					console.log('blob: ', blob);
-					// Upload
-					//fetch('upload', {method: 'POST', body: fd})
-					fetch('server.php', {
-							method: 'POST',
-							body: fd
-						})
-						.then(response => response.json())
-						//.then(response => console.log('server', response.blob()))
-						.then(res => console.log(res));
-				}); */
+					fd.append('image', blob);
+					$.ajax({
+						url: 'server.php',
+						type: 'POST',
+						data: fd,
+						processData: false,
+						contentType: true,
+						success: function (res) {
+							console.log(res);
+						},
+						error: function () {
+							console.log('Произошла ошибка!');
+						}
+					});
+				}, 'image/jpeg'); */
+
+		/* blob 4 */
+				
 
 	});
 

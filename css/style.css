@@ -68,11 +68,6 @@ body {
 	flex-wrap: wrap;
 }
 
-.slider {
-	width: 100%;
-}
-
-
 /* Рамка */
 .centerCanvas {
 	position: relative;
