@@ -328,7 +328,6 @@
 
 		/* ajax */
 		let dataURL = canvasHidden.toDataURL('image/jpeg');
-		console.log('dataURL: ', dataURL);
 		$.ajax({
 			url: './server.php',
 			type: 'POST',
@@ -519,17 +518,36 @@
 
 	const popupNone = () => { // убираем окно редактора
 		popupPhoto.style.display = 'none';
+	};
 
+	const getOldImg = () => { // вставка старой картинки
+
+		imageParams.update = () => { // обнуляем параметры отступа и масштаба картинки
+			imageParams.scale = 1;
+			imageParams.offsetX = 0;
+			imageParams.offsetY = 0;
+		};
+
+		imageParams.update(); // старая картинка встаёт по старым координатам
+
+		let image = new Image(); // для нового(старого) рисунка
+		image.onload = () => {
+			originalImage = image; // вместо старого рисунка - новый
+			updateImgCanvas();
+		};
+		image.src = ('./image/space.jpeg'); // путь для загрузки картинки
 	};
 
 	popup.addEventListener('click', (event) => {
 		let target = event.target;
 		if (target.matches('#cancel')) { // если нажали на кнопку "отмена"
 			popupNone();
+			getOldImg();
 		} else {
 			target = target.closest('.editorPhoto');
 			if (!target) { //если не получили editorPhoto, т.е. получили null при клике за пределами окна
 				popupNone(); //окно исчезает при клике за пределы окна
+				getOldImg();
 			}
 		}
 	});
