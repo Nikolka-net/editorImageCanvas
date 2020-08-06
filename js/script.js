@@ -168,7 +168,8 @@
 
 	/* вызов редактора при нажатии на картинку */
 
-	const editorPhoto = document.querySelector('.editorPhoto');
+
+	const popupPhoto = document.querySelector('.popupPhoto');
 	const imgAll = document.querySelectorAll('img'); // получ. все img
 
 
@@ -234,7 +235,7 @@
 	imgAll.forEach((elem) => {
 		elem.addEventListener('click', () => {
 			sizeImg.img = elem; // Передаём саму картинку в объект, чтобы к ней обратиться
-			editorPhoto.style.display = 'flex';
+			popupPhoto.style.display = 'flex';
 			getSizeImg();
 			getSizeCanvas();
 			getAdaptiveOverlay();
@@ -514,14 +515,24 @@
 
 	/* функция "отмена", убираем редактор */
 
-	const cancel = document.getElementById('cancel');
+	const popup = document.querySelector('.popup'); // получ. элемент, где расположен редактор
 
-	cancel.addEventListener('click', () => {
+	const popupNone = () => { // убираем окно редактора
+		popupPhoto.style.display = 'none';
 
-		editorPhoto.style.display = 'none';
+	};
+
+	popup.addEventListener('click', (event) => {
+		let target = event.target;
+		if (target.matches('#cancel')) { // если нажали на кнопку "отмена"
+			popupNone();
+		} else {
+			target = target.closest('.editorPhoto');
+			if (!target) { //если не получили editorPhoto, т.е. получили null при клике за пределами окна
+				popupNone(); //окно исчезает при клике за пределы окна
+			}
+		}
 	});
-
-
 
 	/* end функция "отмена" */
 
