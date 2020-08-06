@@ -15,7 +15,7 @@
 	const context = canvas.getContext('2d'); // работаем в режиме 2d
 	let originalImage = await loadImage('./image/space.jpeg'); // получ. изображение, дождись выполнения промиса
 
-	const mouse = getMouse(canvas); // данные по координатам
+	const events = getEvents(canvas); // данные по координатам
 
 	let image = originalImage; // переменная для originalImage
 
@@ -24,6 +24,7 @@
 		offsetY: 0,
 		scale: 1 // масштаб
 	};
+
 
 	canvas.width = sizeCanvas.CANVAS_WIDTH; // размер
 	canvas.height = sizeCanvas.CANVAS_HEIGHT;
@@ -34,17 +35,50 @@
 	function update() {
 		requestAnimationFrame(update);
 
-		if (mouse.left) { // если нажата левая кнопка
-			/* Изменение отступов для изме-я отображе-я картинки */
-			imageParams.offsetX += mouse.dx;
-			imageParams.offsetY += mouse.dy;
+		/* Изменение отступов для изме-я отображе-я картинки */
+		if (events.leftMouse) { // если нажата левая кнопка
+			imageParams.offsetX += events.dx;
+			imageParams.offsetY += events.dy;
 		}
+
+		/* my */
+
+		if (events.tch) { // touch событие движение
+			imageParams.offsetX += events.dx;
+			imageParams.offsetY += events.dy;
+		}
+
+		/* масштаб */
+		if (events.more) { // увеличить
+			events.wheel = parseInt(-100);
+		}
+		if (events.less) { // уменьшить
+			events.wheel = parseInt(100);
+		}
+
+		/* движение */
+		if (events.up) {
+			imageParams.offsetY -= parseInt(3);
+		}
+		if (events.down) {
+			imageParams.offsetY += parseInt(3);
+		}
+		if (events.left) {
+			imageParams.offsetX -= parseInt(3);
+		}
+		if (events.right) {
+			imageParams.offsetX += parseInt(3);
+		}
+
+
+		/* end my  */
 
 		/* Меняем масштаб при прокруч. колёсика мыши*/
-		if (mouse.wheel) {
-			imageParams.scale -= mouse.wheel / 1000;
+		if (events.wheel) {
+			imageParams.scale -= events.wheel / 10000;
 
 		}
+
 		clearCanvas();
 		context.drawImage( // отрисовка изображения
 			image,
@@ -56,7 +90,8 @@
 			image.width * imageParams.scale, // > < масштаб
 			image.height * imageParams.scale
 		);
-		mouse.update(); // обнуляем параметры dx and dy
+		events.update(); // обнуляем параметры dx and dy
+
 
 	}
 
@@ -99,12 +134,12 @@
 
 	/* Скачать фото */
 
-	document.getElementById('download').addEventListener('click', () => {
-		const aElement = document.createElement('a'); // создаём ссылку
-		aElement.setAttribute('download', 'myImage.jpeg'); // браузеру: мы хотим скачать
-		aElement.href = canvas.toDataURL('image/jpeg'); // задаём адрес картинки
-		aElement.click(); // кликаем по кнопке
-	});
+	/* 	document.getElementById('download').addEventListener('click', () => {
+			const aElement = document.createElement('a'); // создаём ссылку
+			aElement.setAttribute('download', 'myImage.jpeg'); // браузеру: мы хотим скачать
+			aElement.href = canvas.toDataURL('image/jpeg'); // задаём адрес картинки
+			aElement.click(); // кликаем по кнопке
+		}); */
 
 	/* Выбрать фото и закачать */
 	const loadImageInput = document.getElementById('loadImage'); // получ. список загруж. файлов
@@ -259,18 +294,61 @@
 
 	/* Обрезка по рамке */
 
-	let trim = document.getElementById('trim');
+	const trim = document.getElementById('trim');
 	let canvasHidden = document.getElementById('canvasHidden');
 	let canvasHiddenContext = canvasHidden.getContext('2d');
 
 
-	trim.addEventListener('click', () => {
+	trim.addEventListener('click', (event) => {
 
 		canvasHiddenContext.clearRect(0, 0, canvas.width, canvas.height); // очистка canvasHidden
 		canvasHidden.width = sizeImg.widthImgOrig; // задаём размеры canvas
 		canvasHidden.height = sizeImg.heightImgOrig;
 		/* Сохраняем обрез. картинку в соот. с ориг. размером */
 		canvasHiddenContext.drawImage(canvas, sizeOverlay.borderLeft, sizeOverlay.borderTop, sizeImg.widthImg, sizeImg.heightImg, 0, 0, sizeImg.widthImgOrig, sizeImg.heightImgOrig);
+
+		/* Добавление рис. на стр, ajax: сохранение в папке img  */
+
+		// canvasHidden.toBlob(function (blob) {
+		// 	let newImg = document.createElement('img'),
+		// 		url = URL.createObjectURL(blob);
+
+		// 	newImg.onload = function () {
+		// 		// больше не нужно читать blob, поэтому он отменен
+		// 		URL.revokeObjectURL(url);
+		// 	};
+
+		// 	newImg.src = url;
+		// 	// console.log('newImg.src: ', newImg.src);
+		// 	// document.body.appendChild(newImg);
+
+
+		// });
+
+		/* ajax */
+		let dataURL = canvasHidden.toDataURL('image/jpeg');
+		console.log('dataURL: ', dataURL);
+		$.ajax({
+			url: './server.php',
+			type: 'POST',
+			data: {
+				dataURL: dataURL
+			},
+			// processData: false,
+			// contentType: false,
+			success: function (res) {
+				console.log('res', res);
+				/* 	let newImg2 = document.createElement('img');
+					newImg2.src = './img/' + res.data.src;
+					document.body.appendChild(newImg2);
+					console.log('newImg2.src: ', newImg2.src); */
+			},
+			error: function () {
+				console.log('Произошла ошибка!');
+			}
+		});
+
+		/* Другие функции */
 
 		/* blob1 */
 		/* 		canvasHidden.toBlob(function (blob) {
@@ -291,25 +369,26 @@
 				}, 'image/jpeg'); */
 
 		/* blob2 */
-		let url = canvasHidden.toDataURL('image/jpeg');
+		// let url = canvasHidden.toDataURL('image/jpeg');
+
 		// let fd = new FormData();
 		// fd.append('image', url);
 
-		$.ajax({
-			url: 'server.php',
-			type: 'POST',
-			data: {
-				url: url
-			},
-			// processData: false,
-			// contentType: false,
-			success: function (res) {
-				console.log(res);
-			},
-			error: function () {
-				console.log('Произошла ошибка!');
-			}
-		});
+		// $.ajax({
+		// 	url: 'server.php',
+		// 	type: 'POST',
+		// 	data: {
+		// 		url: url
+		// 	},
+		// 	// processData: false,
+		// 	// contentType: false,
+		// 	success: function (res) {
+		// 		console.log(res);
+		// 	},
+		// 	error: function () {
+		// 		console.log('Произошла ошибка!');
+		// 	}
+		// });
 
 
 		/* 	fetch(url)
@@ -332,8 +411,6 @@
 
 		/* blob3 */
 
-
-
 		/* 		canvasHidden.toBlob(function (blob) {
 					let fd = new FormData();
 					fd.append('image', blob);
@@ -353,19 +430,100 @@
 				}, 'image/jpeg'); */
 
 		/* blob 4 */
-				
+
+		/* 		function dataURItoBlob(dataURI) {
+					let binary = atob(dataURI.split(',')[1]);
+					let array = [];
+					for (let i = 0; i < binary.length; i++) {
+						array.push(binary.charCodeAt(i));
+					}
+					return new Blob([new Uint8Array(array)], {
+						type: 'image/jpeg'
+					});
+				} */
+
+		/* 		let dataURL = canvasHidden.toDataURL('image/jpeg');
+				// let blob = dataURItoBlob(dataURL);
+				console.log('blob: ', blob);
+				let fd = new FormData();
+				// fd.append('canvasImage', blob, 'image.jpeg');
+				fd.append('image', blob);
+				$.ajax({
+					url: 'server.php',
+					type: 'POST',
+					data: {
+						dataURL: dataURL
+					},
+					// processData: false,
+					// contentType: false,
+					success: function (res) {
+						console.log(res);
+					},
+					error: function () {
+						console.log('Произошла ошибка!');
+					}
+				}); */
+
+
+		/* end blob 4 */
+
+		/* fetch */
+		/* let dataURL = canvasHidden.toDataURL('image/jpeg');
+		let formData = new FormData();
+		formData.append('dataURL', dataURL); */
+
+		/* fetch('server.php', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(dataURL)
+			})
+			.then(function (res) {
+				console.log('res: ', res);
+
+
+			}).catch(error => console.error(error)); */
+
+		/* 		async function submit() {
+					let imageBlob = await new Promise(resolve => canvasHidden.toBlob(resolve, 'image/png'));
+
+					let formData = new FormData();
+					// formData.append("firstName", "John");
+					formData.append("image", imageBlob);
+
+					let response = await fetch('./server.php', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(formData)
+						})
+						.then(res => res.json())
+						.then(data => {
+							console.log('data');
+						});
+
+				}
+				submit(); */
+		/* end fetch */
+
+		/* end другие функции */
 
 	});
 
+	/* функция "отмена", убираем редактор */
 
-	document.getElementById('download2').addEventListener('click', () => {
+	const cancel = document.getElementById('cancel');
 
-		let aElement = document.createElement('a'); // создаём ссылку
-		aElement.setAttribute('download', 'myImage2.jpeg'); // браузеру: мы хотим скачать
-		aElement.href = canvasHidden.toDataURL('image/jpeg'); // задаём адрес картинки
-		aElement.click(); // кликаем по кнопке
+	cancel.addEventListener('click', () => {
+
+		editorPhoto.style.display = 'none';
 	});
 
+
+
+	/* end функция "отмена" */
 
 	/* end эксперименты */
 
@@ -384,64 +542,315 @@
 
 	}
 
-	/* Получ. координаты */
-	function getMouse(element) {
-		const mouse = {
+	/* Получ. координаты, работа с картинкой */
+
+	let touchMove = (element, event) => { // touch события, не выходим за границу canvas
+		event.preventDefault();
+
+		const rectTouch = element.getBoundingClientRect(); // метод - данные по положению картинки
+
+		/* Ширина и высота canvas */
+		let rectWidth = rectTouch.width;
+		let rectHeight = rectTouch.height;
+
+		/* Координаты касания */
+		const xTouch = event.changedTouches[0].clientX - rectTouch.left;
+		const yTouch = event.changedTouches[0].clientY - rectTouch.top;
+
+		/* Если уводим палец за границу canvas картинка не движется  */
+		if ((xTouch < rectWidth && xTouch > 0) && (yTouch < rectHeight && yTouch > 0)) {
+			if (event.type === 'touchstart') {
+
+				events.tch = true;
+				events.x = xTouch; // обновляем координаты
+				events.y = yTouch;
+			} else if (event.type === 'touchmove') {
+
+				events.dx = xTouch - events.x; // новые минус старые координаты
+				events.dy = yTouch - events.y;
+
+				events.x = xTouch; // обновляем координаты
+				events.y = yTouch;
+			} else if (event.type === 'touchend') {
+
+				events.tch = false;
+			}
+
+		} else { // если выходим за границу
+			events.tch = false;
+		}
+	};
+
+	function getEvents(element) {
+		const events = {
 			x: 0,
 			y: 0,
 			dx: 0,
 			dy: 0, // насколько изменилась координата, насколько сместились
-			left: false, // когда true - нажата левая кнопка мыши
-			wheel: 0 // колесо мыши не крутится
-
+			leftMouse: false, // когда true - нажата левая кнопка мыши
+			wheel: 0, // колесо мыши не крутится
+			tch: false,
+			more: false, // увеличение картинки
+			less: false, // уменьшение картинки
+			up: false, // движение картинки вверх
+			down: false,
+			left: false,
+			right: false,
 		};
 
-		mouse.update = () => { // обнуляем измене-е координат
-			mouse.dx = 0;
-			mouse.dy = 0;
-			mouse.wheel = 0; // обнул. знач. от колёсика мыши
+		events.update = () => { // обнуляем измене-е координат
+			events.dx = 0;
+			events.dy = 0;
+			events.wheel = 0; // обнул. знач. от колёсика мыши
 		};
 
 		/* События на элемент при движении картинки */
 		element.addEventListener('mousemove', event => {
-			const rect = element.getBoundingClientRect(); // метод - данные по полжению картинки
+			const rectMouse = element.getBoundingClientRect(); // метод - данные по полжению картинки
 
-			const x = event.clientX - rect.left; // вычитаем отступ canvasa из клиент-х координат
-			const y = event.clientY - rect.top;
+			const xMouse = event.clientX - rectMouse.left; // вычитаем отступ canvasa из клиент-х координат
+			const yMouse = event.clientY - rectMouse.top;
 
-			mouse.dx = x - mouse.x; // новые минус старые координаты
-			mouse.dy = y - mouse.y;
 
-			mouse.x = x; // обновляем координаты
-			mouse.y = y;
+			events.dx = xMouse - events.x; // новые минус старые координаты
+			events.dy = yMouse - events.y;
+
+
+			events.x = xMouse; // обновляем координаты
+			events.y = yMouse;
 
 		});
+
+
+		/* События на элемент при движении картинки */
+		element.addEventListener('touchmove', event => {
+			touchMove(element, event);
+		});
+
+		element.addEventListener('touchstart', event => {
+			touchMove(element, event);
+		});
+
+		element.addEventListener('touchend', event => {
+			touchMove(element, event);
+		});
+
 
 		/* Нажата кнопка мыши */
 		element.addEventListener('mousedown', event => {
 			if (event.button === 0) { // если левая кнопка мыши
-				mouse.left = true;
+				events.leftMouse = true;
 			}
 		});
 
 		/* Поднята кнопка мыши */
 		element.addEventListener('mouseup', event => {
 			if (event.button === 0) { // если левая кнопка мыши
-				mouse.left = false;
+				events.leftMouse = false;
 			}
 		});
 
 		element.addEventListener('mouseleave', event => {
-			mouse.left = false;
+			events.leftMouse = false;
 		});
 
 		/* Крутим колёсико мыши для масштаба картинки*/
 		element.addEventListener('mousewheel', event => {
-			mouse.wheel = event.deltaY; // прокрутка по оси Y
+			events.wheel = event.deltaY; // прокрутка по оси Y
 			event.preventDefault(); // останавл. распростр. события прокр. мыши дальше
 		});
 
-		return mouse;
+		return events;
 	}
+
+
+	/* my code: события*/
+
+	/* изменение вида кнопки при нажатии мыши и touch событии */
+
+	let buttonMenuAll = document.querySelectorAll('.buttonMenu');
+
+	buttonMenuAll.forEach((elem) => {
+		elem.addEventListener('touchstart', () => {
+			elem.classList.add('opacity');
+
+		});
+		elem.addEventListener('touchend', () => {
+			elem.classList.remove('opacity');
+
+		});
+	});
+
+	buttonMenuAll.forEach((elem) => {
+		elem.addEventListener('mousedown', () => {
+			elem.classList.add('opacity');
+
+		});
+		elem.addEventListener('mouseup', () => {
+			elem.classList.remove('opacity');
+		});
+	});
+
+	/* end изменение вида кнопки при нажатии мыши и touch событии */
+
+	/* движение и изменение масштаба картинки по кнопкам */
+
+	let buttonAll = document.querySelectorAll('button');
+
+
+	/* события мыши на кнопках */
+
+	let mouseEvents = (elem, event) => {
+		if (event.button === 0) {
+			let eventElem = String(elem.classList[0]); // запис. имя класса строкой
+
+			let cssElem = document.querySelector(`.${eventElem}`); // для изменения внешнего вида кнопки
+
+			if (event.type === 'mousedown') { // проверка типа события
+				cssElem.classList.add('opacity'); // добавл. кнопке прозрачность
+				events[eventElem] = true;
+			} else if (event.type === 'mouseup') {
+				cssElem.classList.remove('opacity'); // удаляем прозрачность
+				events[eventElem] = false;
+
+			}
+		}
+	};
+
+	buttonAll.forEach((elem) => {
+		elem.addEventListener('mousedown', (event) => {
+
+			if (elem.matches('.up')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.down')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.left')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.right')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.closest('.more')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.less')) {
+				mouseEvents(elem, event);
+			}
+		});
+		elem.addEventListener('mouseup', (event) => {
+
+			if (elem.matches('.up')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.down')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.left')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.right')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.more')) {
+				mouseEvents(elem, event);
+			}
+			if (elem.matches('.less')) {
+				mouseEvents(elem, event);
+			}
+		});
+	});
+
+	/* end события мыши на кнопках */
+
+
+	/* touch события кнопках */
+
+	let touchEvents = (elem, event) => {
+		event.preventDefault();
+		const rectElem = elem.getBoundingClientRect();
+
+		let eventElem = String(elem.classList[0]); // получ. название класс элемента
+		let rectWidth = rectElem.width;
+		let rectHeight = rectElem.height;
+
+		let cssElem = document.querySelector(`.${eventElem}`); // для изменения внешнего вида кнопки
+
+		const xElem = event.changedTouches[0].clientX - rectElem.left;
+		const yElem = event.changedTouches[0].clientY - rectElem.top;
+
+		/* Если уводим палец за границу кнопки, она не срабатывает */
+		if ((xElem < rectWidth && xElem > 0) && (yElem < rectHeight && yElem > 0)) {
+
+			if (event.type === 'touchstart') { // проверка имени события
+				events[eventElem] = true; // добавляем значение в объект по имени класса элемента
+
+				cssElem.classList.add('opacity'); // добавл. кнопке прозрачность
+
+				event.preventDefault();
+			} else if (event.type === 'touchend') {
+				events[eventElem] = false;
+
+				cssElem.classList.remove('opacity'); // убираем прозрачность
+
+				event.preventDefault();
+
+			}
+		}
+
+	};
+
+	buttonAll.forEach((elem) => {
+		elem.addEventListener('touchstart', (event) => {
+
+			if (elem.matches('.up')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.down')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.left')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.right')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.more')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.less')) {
+				touchEvents(elem, event);
+			}
+
+		});
+		elem.addEventListener('touchend', (event) => {
+
+			if (elem.matches('.up')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.down')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.left')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.right')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.more')) {
+				touchEvents(elem, event);
+			}
+			if (elem.matches('.less')) {
+				touchEvents(elem, event);
+			}
+		});
+	});
+
+
+	/* end движение и масштаб картинки по кнопкам */
+
+	/* end my code */
+
 
 })();

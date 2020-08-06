@@ -11,37 +11,51 @@
 	<title>Photo editor</title>
 </head>
 
-<body>
+<body ontouchstart>
 	<div>
 		<img width="180" height="140" id="romantic" src="./image/romanticsmall.jpeg" alt="">
 	</div>
-	<canvas id="canvasHidden"></canvas>
+	<canvas id="canvasHidden">
+		<p>Ваш браузер не поддерживает элемент canvas.</p>
+	</canvas>
 	<div><img id="romantic2" src="./image/romantic.jpeg" alt=""></div>
-
+	<!-- <div><img id="altay" src="./image/altay.jpg" alt=""></div> -->
+	<div><img id="instagram" src="./image/instagram.jpeg" alt=""></div>
+	<div class="plus"></div>
 	<div class="editorPhoto">
-		<div class="boxImage">
-			<div class="centerCanvas">
-				<canvas id="canvas"></canvas>
+		<div class="editorBox">
+			<div class="editorBox-canvas">
+				<canvas id="canvas">
+					<p>Ваш браузер не поддерживает элемент canvas.</p>
+				</canvas>
 				<div class="overlay">
 				</div>
 			</div>
-			<div class="settings">
-				<div><button class="more">Увеличить</button></div>
-				<div><button class="less">Уменьшить</button></div>
-				<div class="menuCanvasButtons">
-					<div class="buttonCanvas">
-						<label for="loadImage">
-							<a>Выбрать файл</a>
-							<input type="file" accept="image/*" id='loadImage' style="display: none;">
-						</label>
+			<div class="editorBox-settings">
+				<div class="settings-navigation">
+					<div class="navigation-scale">
+						<button class="more buttonScale"></button>
+						<button class="less buttonScale"></button>
 					</div>
-					<div class="buttonCanvas"><button id='trim'>Обрезать</button>
-					</div>
-					<div class="buttonCanvas"><button id='download'>Скачать</button>
-					</div>
-					<div class="buttonCanvas2"><button id='download2'>Скачать2</button>
+					<div class="navigation-moving">
+						<div class="moving-top">
+							<button class="up buttonMoving"></button>
+							<button class="down buttonMoving"></button>
+						</div>
+						<div class="moving-bottom">
+							<button class="left buttonMoving"></button>
+							<button class="right buttonMoving"></button>
+						</div>
 					</div>
 				</div>
+			</div>
+			<div class="editorBox-menu">
+				<label class="buttonMenu" for="loadImage">
+					<a>Выбрать файл</a>
+					<input type="file" accept="image/*" id='loadImage' style="display: none;">
+				</label>
+				<button class="buttonMenu" id='trim'>Применить</button>
+				<button class="buttonMenu" id='cancel'>Отмена</button>
 			</div>
 
 		</div>
