@@ -12,7 +12,40 @@
 
 	const canvas = document.getElementById('canvas');
 	const context = canvas.getContext('2d'); // работаем в режиме 2d
+
+	// function loadImage(src) {
+	// 	console.log('src: ', src);
+	// 	return new Promise((resolve, reject) => { // возвр. промисс
+	// 		try {
+	// 			const image = new Image(); // созд. объект image
+	// 			console.log('image: ', image);
+	// 			image.onload = () => resolve(image); // когда загруз. img вызов. resolve
+	// 			image.src = src;
+	// 			console.log('image.src: ', image.src);
+
+	// 		} catch (err) {
+	// 			return reject(err);
+	// 		}
+	// 	});
+
+	// }
+
+
 	let originalImage = await loadImage('./image/space.jpeg'); // получ. изображение, дождись выполнения промиса
+
+	function loadImage(src) {
+		return new Promise((resolve, reject) => {
+				const image = new Image(); // созд. объект image
+				console.log('image: ', image);
+				image.onload = () => resolve(image); // когда загруз. img вызов. resolve
+				image.src = src;
+				console.log('image.src: ', image.src);
+				image.onerror = () => reject(new Error(`ошибка загрузки скрипта ${src}`));
+
+			})
+			.catch(err => console.log(err));
+
+	}
 
 
 
@@ -311,6 +344,22 @@
 
 		/* Добавление рис. на стр, ajax: сохранение в папке img  */
 
+		// canvasHidden.toBlob(function (blob) {
+		// 	let newImg = document.createElement('img'),
+		// 		url = URL.createObjectURL(blob);
+
+		// 	newImg.onload = function () {
+		// 		// больше не нужно читать blob, поэтому он отменен
+		// 		URL.revokeObjectURL(url);
+		// 	};
+
+		// 	newImg.src = url;
+		// 	// console.log('newImg.src: ', newImg.src);
+		// 	// document.body.appendChild(newImg);
+
+
+		// });
+
 		/* ajax */
 		let dataURL = canvasHidden.toDataURL('image/jpeg');
 		$.ajax({
@@ -332,6 +381,168 @@
 				console.log('Произошла ошибка!');
 			}
 		});
+
+		/* Другие функции */
+
+		/* blob1 */
+		/* 		canvasHidden.toBlob(function (blob) {
+					let fd = new FormData();
+					fd.append(blob);
+					axios
+						.post('../api/server.php', fd, {
+							headers: {
+								'Content-Type': 'multipart/form-data'
+							}
+						})
+						.then((res) => {
+							console.log('res', res);
+						});
+
+					console.log('blob: ', blob);
+
+				}, 'image/jpeg'); */
+
+		/* blob2 */
+		// let url = canvasHidden.toDataURL('image/jpeg');
+
+		// let fd = new FormData();
+		// fd.append('image', url);
+
+		// $.ajax({
+		// 	url: 'server.php',
+		// 	type: 'POST',
+		// 	data: {
+		// 		url: url
+		// 	},
+		// 	// processData: false,
+		// 	// contentType: false,
+		// 	success: function (res) {
+		// 		console.log(res);
+		// 	},
+		// 	error: function () {
+		// 		console.log('Произошла ошибка!');
+		// 	}
+		// });
+
+
+		/* 	fetch(url)
+				.then(res => res.blob()) */
+		/* 	.then(blob => {
+				let fd = new FormData();
+				fd.append('image', blob);
+				console.log('blob: ', blob);
+
+				// Upload
+				//fetch('upload', {method: 'POST', body: fd})
+				 	// fetch('server.php', {
+					// 		method: 'POST',
+					// 		body: fd
+					// 	})
+				// .then(response => response.blob());
+				//  .then(response => console.log('server', response.blob()));
+				//.then(response => console.log('res', response));
+			}); */
+
+		/* blob3 */
+
+		/* 		canvasHidden.toBlob(function (blob) {
+					let fd = new FormData();
+					fd.append('image', blob);
+					$.ajax({
+						url: 'server.php',
+						type: 'POST',
+						data: fd,
+						processData: false,
+						contentType: true,
+						success: function (res) {
+							console.log(res);
+						},
+						error: function () {
+							console.log('Произошла ошибка!');
+						}
+					});
+				}, 'image/jpeg'); */
+
+		/* blob 4 */
+
+		/* 		function dataURItoBlob(dataURI) {
+					let binary = atob(dataURI.split(',')[1]);
+					let array = [];
+					for (let i = 0; i < binary.length; i++) {
+						array.push(binary.charCodeAt(i));
+					}
+					return new Blob([new Uint8Array(array)], {
+						type: 'image/jpeg'
+					});
+				} */
+
+		/* 		let dataURL = canvasHidden.toDataURL('image/jpeg');
+				// let blob = dataURItoBlob(dataURL);
+				console.log('blob: ', blob);
+				let fd = new FormData();
+				// fd.append('canvasImage', blob, 'image.jpeg');
+				fd.append('image', blob);
+				$.ajax({
+					url: 'server.php',
+					type: 'POST',
+					data: {
+						dataURL: dataURL
+					},
+					// processData: false,
+					// contentType: false,
+					success: function (res) {
+						console.log(res);
+					},
+					error: function () {
+						console.log('Произошла ошибка!');
+					}
+				}); */
+
+
+		/* end blob 4 */
+
+		/* fetch */
+		/* let dataURL = canvasHidden.toDataURL('image/jpeg');
+		let formData = new FormData();
+		formData.append('dataURL', dataURL); */
+
+		/* fetch('server.php', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(dataURL)
+			})
+			.then(function (res) {
+				console.log('res: ', res);
+
+
+			}).catch(error => console.error(error)); */
+
+		/* 		async function submit() {
+					let imageBlob = await new Promise(resolve => canvasHidden.toBlob(resolve, 'image/png'));
+
+					let formData = new FormData();
+					// formData.append("firstName", "John");
+					formData.append("image", imageBlob);
+
+					let response = await fetch('./server.php', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify(formData)
+						})
+						.then(res => res.json())
+						.then(data => {
+							console.log('data');
+						});
+
+				}
+				submit(); */
+		/* end fetch */
+
+		/* end другие функции */
 
 	});
 
@@ -380,18 +591,22 @@
 	/* end эксперименты */
 
 	/* Получаем img */
-	function loadImage(src) {
-		return new Promise((resolve, reject) => { // возвр. промисс
-			try {
-				const image = new Image(); // созд. объект image
-				image.onload = () => resolve(image); // когда загруз. img вызов. resolve
-				image.src = src;
-			} catch (err) {
-				return reject(err);
-			}
-		});
+	// function loadImage(src) {
+	// 	console.log('src: ', src);
+	// 	return new Promise((resolve, reject) => { // возвр. промисс
+	// 		try {
+	// 			const image = new Image(); // созд. объект image
+	// 			console.log('image: ', image);
+	// 			image.onload = () => resolve(image); // когда загруз. img вызов. resolve
+	// 			image.src = src;
+	// 			console.log('image.src: ', image.src);
 
-	}
+	// 		} catch (err) {
+	// 			return reject(err);
+	// 		}
+	// 	});
+
+	// }
 
 	/* Получ. координаты, работа с картинкой */
 
@@ -705,4 +920,3 @@
 
 
 })();
- 

@@ -7,63 +7,60 @@
 		content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<link rel="stylesheet" href="./css/style.css">
+
 	<title>Photo editor</title>
 </head>
 
-<body>
+<body ontouchstart>
 	<div>
 		<img width="180" height="140" id="romantic" src="./image/romanticsmall.jpeg" alt="">
 	</div>
-	<canvas id="canvasHidden"></canvas>
+	<canvas id="canvasHidden">
+		<p>Ваш браузер не поддерживает элемент canvas.</p>
+	</canvas>
 	<div><img id="romantic2" src="./image/romantic.jpeg" alt=""></div>
-
-	<div class="editorPhoto">
-		<div class="boxImage">
-			<div class="centerCanvas">
-				<canvas id="canvas"></canvas>
+	<div><img id="instagram" src="./image/leon.jpeg" alt=""></div>
+	<div class="popup popupPhoto">
+		<div class="editorPhoto">
+			<div class="editorPhoto-canvas">
+				<canvas id="canvas">
+					<p>Ваш браузер не поддерживает элемент canvas.</p>
+				</canvas>
 				<div class="overlay">
 				</div>
 			</div>
-			<div class="settings">
-				<div class="sliders">
-					<div class="slider">
-						<label for="filterSepia">
-							<input type="checkbox" id='filterSepia' /> Сепия фильтр
-						</label>
+			<div class="editorPhoto-settings">
+				<div class="settings-navigation">
+					<div class="navigation-scale">
+						<button class="more buttonScale"></button>
+						<button class="less buttonScale"></button>
 					</div>
-					<div class="slider">
-						<label for="filterGray">
-							<input type="checkbox" id='filterGray' /> Серый фильтр
-						</label>
-					</div>
-					<!-- 		<div class="slider">
-						<label for="brightness">Яркость</label>
-						<input type="range" min="50" max="200" value="100" id="brightness">
-					</div> -->
-				</div>
-
-				<div class="menuCanvasButtons">
-					<div class="buttonCanvas">
-						<label for="loadImage">
-							<a>Выбрать файл</a>
-							<input type="file" accept="image/*" id='loadImage' style="display: none;">
-						</label>
-					</div>
-					<div class="buttonCanvas"><button id='trim'>Обрезать</button>
-					</div>
-					<div class="buttonCanvas"><button id='download'>Скачать</button>
-					</div>
-					<div class="buttonCanvas2"><button id='download2'>Скачать2</button>
+					<div class="navigation-moving">
+						<div class="moving-top">
+							<button class="up buttonMoving"></button>
+							<button class="down buttonMoving"></button>
+						</div>
+						<div class="moving-bottom">
+							<button class="left buttonMoving"></button>
+							<button class="right buttonMoving"></button>
+						</div>
 					</div>
 				</div>
 			</div>
-
+			<div class="editorPhoto-menu">
+				<label class="buttonMenu" for="loadImage">
+					<a>Выбрать файл</a>
+					<input type="file" accept="image/*" id='loadImage' style="display: none;">
+				</label>
+				<button class="buttonMenu" id='trim'>Применить</button>
+				<button class="buttonMenu" id='cancel'>Отмена</button>
+			</div>
 		</div>
-
 	</div>
-	<!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script> -->
-	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script> -->
-	<script src='./js/script.js'></script>
+	<script src="./js/jquery.min.js"></script>
+	<!-- <script src="./js/script.js"></script> -->
+	<script src="./js/main.js"></script>
+	<script src="https://unpkg.com/regenerator-runtime@0.13.1/runtime.js"></script>
 </body>
 
 </html>

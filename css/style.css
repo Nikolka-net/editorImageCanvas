@@ -7,74 +7,73 @@
 
 body {
 	font-family: Roboto, sans-serif;
-	/* width: 100%;
-	height: 100vh;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 20px;
-	overflow: hidden;
-	background: linear-gradient(#ad5389, #3c1053); */
 }
 
-.boxImage {
-	background: #fff;
+.popupPhoto {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	top: 0;
+	right: 0;
+	background-color: rgba(0, 0, 0, .5);
+	z-index: 100;
+	display: none;
+	width: 100%;
+	height: 100vh;
+}
+
+.editorPhoto {
+	display: flex;
+	flex-direction: column;
+	background: #e8d9c5;
 	padding: 15px;
 	box-shadow: 15px 1px 30px 0 rgba(0, 0, 0, 0.14), 0 0 0 0 rgba(0, 0, 0, .12), 0 0 0 0 rgba(0, 0, 0, .3);
 	border-radius: 10px;
-	border: 2px dotted green;
-}
-
-
-.editorPhoto {
-	width: 100%;
-	height: 100vh;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-direction: column;
-	background: rgba(255, 123, 12, 0.5);
-	display: none;
+	border: 2px solid #936b09;
+	position: fixed;
+	left: 50%;
+	top: 10%;
+	transform: translateX(-50%);
+	-webkit-transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	transform: translateX(-50%);
+	z-index: 150;
 }
 
 
 /* Canvas */
 #canvas {
 	border: 2px solid red;
-	background: antiquewhite;
+	background: #dcdcdc;
 	width: 400px;
 	height: 400px;
 }
 
-.buttonCanvas {
+.menuButton {
 	padding: 4px;
 }
 
 #canvasHidden {
-	background: red;
+	border: 2px solid red;
+	display: none;
 }
+
 
 /* end canvas */
 
-.settings {
+.editorPhoto-settings {
 	display: flex;
 	justify-content: space-around;
 	width: 100%;
-	height: auto;
-	background: #ffffff;
-	padding: 6px;
+	/* background: #ffffff; */
+	padding-top: 6px;
 	border-radius: 10px;
 	align-items: center;
 	flex-wrap: wrap;
 }
 
-.slider {
-	width: 100%;
-}
-
-
 /* Рамка */
-.centerCanvas {
+.editorPhoto-canvas {
 	position: relative;
 	text-align: center;
 	max-width: 400px;
@@ -100,6 +99,128 @@ body {
 
 /* end рамка */
 
+/* button */
+
+
+.settings-navigation {
+	display: flex;
+	align-items: flex-start;
+	flex-grow: 1;
+	justify-content: space-between;
+	flex-wrap: wrap;
+}
+
+.navigation-scale {
+	display: flex;
+	justify-content: space-between;
+	flex-basis: 30%;
+}
+
+.navigation-moving {
+	display: flex;
+	justify-content: space-evenly;
+	flex-basis: 30%;
+	flex-direction: column;
+}
+
+.moving-top {
+	display: flex;
+	justify-content: space-between;
+}
+
+.moving-bottom {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 15px;
+}
+
+.editorPhoto-menu {
+	display: flex;
+	flex-grow: 1;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	margin-top: 15px;
+}
+
+
+.buttonMenu {
+	padding: 10px;
+	border: none;
+	background-color: #0f7ae5;
+	color: #fff;
+	min-width: 120px;
+	font-size: 12px;
+	font-family: Arial, sans-serif;
+	text-align: center;
+	box-shadow: 2px 2px 4px 1px #333;
+	text-transform: uppercase;
+	opacity: 1;
+}
+
+.buttonMoving {
+	padding: 10px;
+	border: none;
+	background-color: #0f7ae5;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: auto 50%;
+	color: #fff;
+	min-width: 50px;
+	min-height: 50px;
+	font-size: 15px;
+	text-align: center;
+	box-shadow: 2px 2px 4px 1px #333;
+}
+
+.buttonScale {
+	background-color: #0f7ae5;
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: auto 60%;
+	border: none;
+	padding: 8px;
+	min-width: 50px;
+	min-height: 50px;
+	box-shadow: 2px 2px 4px 1px #333;
+	text-align: center;
+
+}
+
+
+/* для изменения кнопок при touch событии js*/
+.opacity {
+	opacity: 0.8;
+}
+
+/* end для изменения кнопок при touch событии js*/
+
+.more {
+	background-image: url('../image/plus.png');
+}
+
+.less {
+	background-image: url('../image/minus.png');
+}
+
+.up {
+	background-image: url('../image/up.png');
+}
+
+.down {
+	background-image: url('../image/down.png');
+}
+
+.left {
+	background-image: url('../image/left.png');
+}
+
+.right {
+	background-image: url('../image/right.png');
+}
+
+/* end button */
+
+
 /* media */
 
 @media (max-width: 991px) {
@@ -108,12 +229,28 @@ body {
 		height: 350px;
 	}
 
-	.centerCanvas {
+	.editorPhoto-canvas {
 		max-width: 350px;
 	}
 
-	.boxImage {
+	.editorPhoto {
 		max-width: 385px;
+	}
+
+	.buttonMenu {
+		margin: 5px 5px 5px 0px;
+	}
+
+	.editorPhoto-menu {
+		justify-content: space-around;
+	}
+
+	.navigation-moving {
+		flex-basis: 33%;
+	}
+
+	.navigation-scale {
+		flex-basis: 33%;
 	}
 }
 
@@ -124,29 +261,51 @@ body {
 		height: 280px;
 	}
 
-	.centerCanvas {
+	.editorPhoto-canvas {
 		max-width: 280px;
 	}
 
-	.boxImage {
+	.editorPhoto {
 		max-width: 305px;
 		padding: 10px;
 
+	}
+
+	.navigation-moving {
+		flex-basis: 42%;
+	}
+
+	.navigation-scale {
+		flex-basis: 42%;
 	}
 }
 
 
 @media (max-width: 575px) {
 	#canvas {
-		width: 150px;
-		height: 150px;
+		width: 200px;
+		height: 200px;
 	}
 
-	.centerCanvas {
-		max-width: 150px;
+	.editorPhoto-canvas {
+		max-width: 200px;
 	}
 
-	.boxImage {
-		max-width: 175px;
+	.editorPhoto {
+		max-width: 225px;
+	}
+
+	.navigation-moving {
+		flex-basis: 58%;
+	}
+
+	.navigation-scale {
+		flex-direction: column;
+		align-items: flex-start;
+		flex-basis: 32%;
+	}
+
+	.less {
+		margin-top: 15px;
 	}
 }
