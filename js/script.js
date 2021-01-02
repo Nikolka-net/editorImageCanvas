@@ -1,7 +1,5 @@
 'use strict';
 
-
-
 (async function () {
 
 	/* Размеры canvas по умолчанию */
@@ -322,11 +320,6 @@
 			// processData: false,
 			// contentType: false,
 			success: function (res) {
-				console.log('res', res);
-				/* 	let newImg2 = document.createElement('img');
-					newImg2.src = './img/' + res.data.src;
-					document.body.appendChild(newImg2);
-					console.log('newImg2.src: ', newImg2.src); */
 			},
 			error: function () {
 				console.log('Произошла ошибка!');
@@ -705,4 +698,3 @@
 
 
 })();
- 
